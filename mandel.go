@@ -4,14 +4,14 @@ import (
 	"os"
 	"fmt"
 	img "image"
-	//"image/color"
+	"image/color"
 	"image/color/palette"
 	"image/png"
 	"math"
 	"sort"
 )
 
-const IT = 2000
+const IT = 512
 
 func it(ca, cb float64) (int, float64) {
 	var a, b float64 = 0, 0
@@ -28,12 +28,43 @@ func it(ca, cb float64) (int, float64) {
 	return IT, a * a + b * b
 }
 
+var Gameboy = []color.Color{
+	color.RGBA{14, 55, 15, 255},
+	color.RGBA{47, 97, 48, 255},
+	color.RGBA{138, 171, 25, 255},
+	color.RGBA{154, 187, 27, 255},
+}
+
+var Retro = []color.Color{
+	color.RGBA{0x00, 0x04, 0x0f, 0xff},
+	color.RGBA{0x03, 0x26, 0x28, 0xff},
+	color.RGBA{0x07, 0x3e, 0x1e, 0xff},
+	color.RGBA{0x18, 0x55, 0x08, 0xff},
+	color.RGBA{0x5f, 0x6e, 0x0f, 0xff},
+	color.RGBA{0x84, 0x50, 0x19, 0xff},
+	color.RGBA{0x9b, 0x30, 0x22, 0xff},
+	color.RGBA{0xb4, 0x92, 0x2f, 0xff},
+	color.RGBA{0x94, 0xca, 0x3d, 0xff},
+	color.RGBA{0x4f, 0xd5, 0x51, 0xff},
+	color.RGBA{0x66, 0xff, 0xb3, 0xff},
+	color.RGBA{0x82, 0xc9, 0xe5, 0xff},
+	color.RGBA{0x9d, 0xa3, 0xeb, 0xff},
+	color.RGBA{0xd7, 0xb5, 0xf3, 0xff},
+	color.RGBA{0xfd, 0xd6, 0xf6, 0xff},
+	color.RGBA{0xff, 0xf0, 0xf2, 0xff},
+}
+
 func main() {
 	//width, height := 1366, 768
 	width, height := 1366*4, 768*4
 	ratio := float64(height) / float64(width)
 	//xpos, ypos, zoom_width := -.748, 0.1, .003
-	xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
+	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
+	//xpos, ypos, zoom_width := -.16070135, 1.0375665, 1.0e-7
+	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
+	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  5E-9
+	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
+	xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000002
 	xmin, xmax := xpos - zoom_width / 2.0, xpos + zoom_width / 2.0
 	ymin, ymax := ypos - zoom_width * ratio / 2.0, ypos + zoom_width * ratio / 2.0
 	
@@ -50,7 +81,7 @@ func main() {
 			stop_it, norm := it(a, b)
 			smooth_val := IT + 1 - (math.Log(norm) + float64(stop_it))
 			smooth_val /= IT
-			single_values[i] = smooth_val
+			single_values[i] = 1.0 - smooth_val
 			//fmt.Println(norm)
 			//r, g, b := HuslToRGB(100. + 100. * smooth_val, 88.7, 44.3 + 20. * smooth_val)
 			//r, g, b := smooth_val, .4 * smooth_val, -smooth_val
@@ -69,10 +100,19 @@ func main() {
 	sort.Float64s(sorted_values)
 	//fmt.Println(sorted_values[0:10])
 
-	pal := palette.Plan9
+	var pal []color.Color
+	if true {
+		pal = palette.Plan9
+		//pal = palette.WebSafe
+	} else {
+		pal = Retro
+	}
+	//pal := palette.WebSafe
+	//pal := Gameboy
+	//pal := Retro
 	split_values := make([]float64, len(pal)-1)
 	for i := range split_values {
-		split_values[i] = sorted_values[i * len(sorted_values) / len(split_values)]
+		split_values[i] = sorted_values[(i+1) * len(sorted_values) / len(pal)]
 	}
 	//fmt.Println(split_values)
 	
