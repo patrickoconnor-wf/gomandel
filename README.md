@@ -1,6 +1,8 @@
 Mandelbrot in Golang
 ===========
 
+![spiral](https://raw.githubusercontent.com/marijnfs/gomandel/master/spiral.jpg)
+
 Calculates a mandelbrot in double point precision, normalises the values such that the palette is distributed equally.
 
 ## Run
