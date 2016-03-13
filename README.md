@@ -1,0 +1,2 @@
+# gomandel
+Mandelbrot in Golang
