@@ -55,16 +55,17 @@ var Retro = []color.Color{
 }
 
 func main() {
-	//width, height := 1366, 768
-	width, height := 1366*4, 768*4
+	//width, height := 600, 600
+	//width, height := 1366*4, 768*4
+	width, height := 1680*4, 1050*4
 	ratio := float64(height) / float64(width)
 	//xpos, ypos, zoom_width := -.748, 0.1, .003
 	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
 	//xpos, ypos, zoom_width := -.16070135, 1.0375665, 1.0e-7
 	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
-	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  5E-9
+	xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
 	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
-	xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000002
+	//xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000004
 	xmin, xmax := xpos - zoom_width / 2.0, xpos + zoom_width / 2.0
 	ymin, ymax := ypos - zoom_width * ratio / 2.0, ypos + zoom_width * ratio / 2.0
 	
@@ -111,9 +112,18 @@ func main() {
 	//pal := Gameboy
 	//pal := Retro
 	split_values := make([]float64, len(pal)-1)
+
+	
+	factor := .98
+	start := .9
 	for i := range split_values {
-		split_values[i] = sorted_values[(i+1) * len(sorted_values) / len(pal)]
+		//index := (i+1) * len(sorted_values) / len(pal)
+		index := int(float64(len(sorted_values)-1) * (1.0 - start))
+		fmt.Println(index, len(sorted_values))
+		split_values[i] = sorted_values[index]
+		start *= factor
 	}
+	sort.Float64s(split_values)
 	//fmt.Println(split_values)
 	
 
