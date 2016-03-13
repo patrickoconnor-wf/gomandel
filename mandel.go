@@ -29,13 +29,11 @@ func it(ca, cb float64) (int, float64) {
 }
 
 func main() {
-	//width, height := 1366*2, 768*2
-	width, height := 1366, 768
+	//width, height := 1366, 768
+	width, height := 1366*4, 768*4
 	ratio := float64(height) / float64(width)
-	//xpos, ypos, zoom_width := .275, .4775, .01
-	//xpos, ypos, zoom_width := -.750045367143, 0.004786271734, .000000001
-	//xpos, ypos, zoom_width := -.6286, -.0062, 1.
-	xpos, ypos, zoom_width := -.0062, -.6486, .1
+	//xpos, ypos, zoom_width := -.748, 0.1, .003
+	xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
 	xmin, xmax := xpos - zoom_width / 2.0, xpos + zoom_width / 2.0
 	ymin, ymax := ypos - zoom_width * ratio / 2.0, ypos + zoom_width * ratio / 2.0
 	
