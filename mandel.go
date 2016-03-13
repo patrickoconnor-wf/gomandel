@@ -103,8 +103,8 @@ func main() {
 
 	var pal []color.Color
 	if true {
-		pal = palette.Plan9
-		//pal = palette.WebSafe
+		//pal = palette.Plan9
+		pal = palette.WebSafe
 	} else {
 		pal = Retro
 	}
