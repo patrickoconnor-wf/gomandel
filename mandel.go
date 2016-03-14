@@ -88,7 +88,7 @@ func main() {
 	
 	single_values := make([]float64, width * height)
 	
-	fmt.Println("Mandelling...")
+	fmt.Print("Mandelling...")
 
 	var wg sync.WaitGroup
 
@@ -111,13 +111,16 @@ func main() {
 		}(y)
 	}
 	wg.Wait()
-
+	fmt.Println("Done")
+	fmt.Print("Sorting...")
 	sorted_values := make([]float64, len(single_values))
 	for i := range sorted_values {
 		sorted_values[i] = single_values[i]
 	}
 	sort.Float64s(sorted_values)
-	//fmt.Println(sorted_values[0:10])
+	
+	fmt.Println("Done")
+
 
 	var pal []color.Color
 	palette_map := make(map[string][]color.Color)
@@ -141,6 +144,9 @@ func main() {
 	sort.Float64s(split_values)
 
 	image := img.NewRGBA(img.Rectangle{img.Point{0, 0}, img.Point{width, height}})
+
+	fmt.Print("Filling...")
+
 	i := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -149,8 +155,13 @@ func main() {
 			i++
 		}
 	}
+	fmt.Println("Done")
 
+	fmt.Println("Resizing...")	
 	image_resized := resize.Resize(uint(xres), uint(yres), image, resize.Lanczos3)
+	fmt.Println("Done")
+
 	out_file, _ := os.Create(out_filename)
 	png.Encode(out_file, image_resized)
+	fmt.Println("Finished writing to:", out_filename)
 }
