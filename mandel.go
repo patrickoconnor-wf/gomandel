@@ -1,15 +1,16 @@
 package main
 
 import (
-	"os"
+	"flag"
 	"fmt"
 	img "image"
 	"image/color"
 	"image/color/palette"
 	"image/png"
 	"math"
+	"os"
 	"sort"
-	"flag"
+	"sync"
 
 	"github.com/nfnt/resize"
 )
@@ -89,22 +90,27 @@ func main() {
 	
 	fmt.Println("Mandelling...")
 
-	i := 0
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			a := (float64(x) / float64(width)) * (xmax - xmin) + xmin 
-			b := (float64(y) / float64(height)) * (ymin - ymax) + ymax
-			stop_it, norm := it(a, b)
-			smooth_val := float64(IT - stop_it) + math.Log(norm)
+	var wg sync.WaitGroup
 
-			if invert {
-				single_values[i] = smooth_val
-			} else {
-				single_values[i] = -smooth_val
+	for y := 0; y < height; y++ {
+		wg.Add(1)
+		go func(y int) {
+			defer wg.Done()
+			for x := 0; x < width; x++ {
+				a := (float64(x) / float64(width)) * (xmax - xmin) + xmin
+				b := (float64(y) / float64(height)) * (ymin - ymax) + ymax
+				stop_it, norm := it(a, b)
+				smooth_val := float64(IT - stop_it) + math.Log(norm)
+				i := y * width + x
+				if invert {
+					single_values[i] = smooth_val
+				} else {
+					single_values[i] = -smooth_val
+				}
 			}
-			i++
-		}
+		}(y)
 	}
+	wg.Wait()
 
 	sorted_values := make([]float64, len(single_values))
 	for i := range sorted_values {
@@ -119,27 +125,26 @@ func main() {
 	palette_map["websafe"] = palette.WebSafe
 	palette_map["gameboy"] = Gameboy
 	palette_map["retro"] = Retro
-	
+
 	pal = palette_map[palette_string]
 
 	split_values := make([]float64, len(pal)-1)
-	
+
 	factor := .98
 	start := .9
 	for i := range split_values {
-		index := (i+1) * len(sorted_values) / len(pal)
+		index := (i + 1) * len(sorted_values) / len(pal)
 		//index := int(float64(len(sorted_values)-1) * (1.0 - start))
 		split_values[i] = sorted_values[index]
 		start *= factor
 	}
 	sort.Float64s(split_values)
-	
 
 	image := img.NewRGBA(img.Rectangle{img.Point{0, 0}, img.Point{width, height}})
-	i = 0
+	i := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			color_index := sort.Search(len(split_values), func(j int) bool {return single_values[i] < split_values[j]})
+			color_index := sort.Search(len(split_values), func(j int) bool { return single_values[i] < split_values[j] })
 			image.Set(x, y, pal[color_index])
 			i++
 		}
