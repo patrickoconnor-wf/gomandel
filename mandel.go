@@ -77,8 +77,6 @@ var Retro = []color.Color{
 func main() {
 	width, height := xres*aa, yres*aa
 	ratio := float64(height) / float64(width)
-	//xpos, ypos, zoom_width := -.748, 0.1, .003
-	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
 	//xpos, ypos, zoom_width := -.16070135, 1.0375665, 1.0e-7
 	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
 	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
@@ -95,7 +93,7 @@ func main() {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			a := (float64(x) / float64(width)) * (xmax - xmin) + xmin 
-			b := (float64(y) / float64(height)) * (ymax - ymin) + ymin
+			b := (float64(y) / float64(height)) * (ymin - ymax) + ymax
 			stop_it, norm := it(a, b)
 			smooth_val := float64(IT - stop_it) + math.Log(norm)
 
@@ -129,8 +127,8 @@ func main() {
 	factor := .98
 	start := .9
 	for i := range split_values {
-		//index := (i+1) * len(sorted_values) / len(pal)
-		index := int(float64(len(sorted_values)-1) * (1.0 - start))
+		index := (i+1) * len(sorted_values) / len(pal)
+		//index := int(float64(len(sorted_values)-1) * (1.0 - start))
 		split_values[i] = sorted_values[index]
 		start *= factor
 	}
