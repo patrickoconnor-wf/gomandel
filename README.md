@@ -8,13 +8,19 @@ Calculates a mandelbrot in double point precision, normalises the values such th
 ## Run
 Set x, y and zoom to an interesting point in the mandelbrot and run
 
-`go run mandel.go`
+`go run mandel.go --aa=4`
 
-This creates the image out.png. To do antialiasing, generate the image at a higher resolution (e.g. in examples 1366*4 x 768*4) and use imagemagic to reduce resolution
+This creates the image out.png with 4x anti aliasing. For more options see:
+
+`go run mander.go --help`
 
 `convert out.png -resize 1366x768 out2.png`
 
+## Install
+Depends on a resize library for resizing after anti aliasing. Install by running:
+
+`go get github.com/nfnt/resize`
+
 ## Todo
-  * Use Flags to make it easily parametrisable
   * Allow for deeper zooms
 

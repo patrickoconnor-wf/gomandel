@@ -9,9 +9,29 @@ import (
 	"image/png"
 	"math"
 	"sort"
+	"flag"
+
+	"github.com/nfnt/resize"
 )
 
-const IT = 512
+var IT, xres, yres, aa int
+var xpos, ypos, radius float64
+var out_filename, palette_string string
+var invert bool
+
+func init() {
+	flag.IntVar(&IT, "IT", 512, "maximum number of iterations")
+	flag.IntVar(&xres, "xres", 500, "x resolution")
+	flag.IntVar(&yres, "yres", 500, "y resolution")
+	flag.IntVar(&aa, "aa", 1, "anti alias, e.g. set aa=4 for 4xAA")
+	flag.Float64Var(&xpos, "x", -.75, "real coordinate")
+	flag.Float64Var(&ypos, "y", 0.0, "imaginary coordinate")
+	flag.Float64Var(&radius, "r", 3.0, "radius")
+	flag.StringVar(&out_filename, "out", "out.png", "output file")
+	flag.StringVar(&palette_string, "palette", "plan9", "One of: plan9|websafe|gameboy|retro")
+	flag.BoolVar(&invert, "invert", false, "Inverts colouring")
+	flag.Parse()
+}
 
 func it(ca, cb float64) (int, float64) {
 	var a, b float64 = 0, 0
@@ -56,7 +76,7 @@ var Retro = []color.Color{
 
 func main() {
 	//width, height := 1366, 768
-	width, height := 1366*4, 768*4
+	width, height := xres*aa, yres*aa
 	ratio := float64(height) / float64(width)
 	//xpos, ypos, zoom_width := -.748, 0.1, .003
 	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
@@ -64,9 +84,9 @@ func main() {
 	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
 	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  5E-9
 	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
-	xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000002
-	xmin, xmax := xpos - zoom_width / 2.0, xpos + zoom_width / 2.0
-	ymin, ymax := ypos - zoom_width * ratio / 2.0, ypos + zoom_width * ratio / 2.0
+	//xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000004
+	xmin, xmax := xpos - radius / 2.0, xpos + radius / 2.0
+	ymin, ymax := ypos - radius * ratio / 2.0, ypos + radius * ratio / 2.0
 	
 	
 	single_values := make([]float64, width * height)
@@ -79,9 +99,13 @@ func main() {
 			a := (float64(x) / float64(width)) * (xmax - xmin) + xmin 
 			b := (float64(y) / float64(height)) * (ymax - ymin) + ymin
 			stop_it, norm := it(a, b)
-			smooth_val := IT + 1 - (math.Log(norm) + float64(stop_it))
-			smooth_val /= IT
-			single_values[i] = 1.0 - smooth_val
+			smooth_val := float64(IT - stop_it) + math.Log(norm)
+			//smooth_val /= IT
+			if invert {
+				single_values[i] = smooth_val
+			} else {
+				single_values[i] = -smooth_val
+			}
 			//fmt.Println(norm)
 			//r, g, b := HuslToRGB(100. + 100. * smooth_val, 88.7, 44.3 + 20. * smooth_val)
 			//r, g, b := smooth_val, .4 * smooth_val, -smooth_val
@@ -101,12 +125,13 @@ func main() {
 	//fmt.Println(sorted_values[0:10])
 
 	var pal []color.Color
-	if true {
-		pal = palette.Plan9
-		//pal = palette.WebSafe
-	} else {
-		pal = Retro
-	}
+	palette_map := make(map[string][]color.Color)
+	palette_map["plan9"] = palette.Plan9
+	palette_map["websafe"] = palette.WebSafe
+	palette_map["gameboy"] = Gameboy
+	palette_map["retro"] = Retro
+	
+	pal = palette_map[palette_string]
 	//pal := palette.WebSafe
 	//pal := Gameboy
 	//pal := Retro
@@ -127,6 +152,8 @@ func main() {
 			i++
 		}
 	}
-	out_file, _ := os.Create("out.png")
-	png.Encode(out_file, image)
+
+	image_resized := resize.Resize(uint(xres), uint(yres), image, resize.Lanczos3)
+	out_file, _ := os.Create(out_filename)
+	png.Encode(out_file, image_resized)
 }
