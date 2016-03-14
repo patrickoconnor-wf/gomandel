@@ -8,7 +8,9 @@ import (
 	"image/png"
 	"math"
 	"os"
+	"runtime"
 	"sort"
+	"sync"
 )
 
 const IT = 512
@@ -73,25 +75,51 @@ func main() {
 
 	fmt.Println("Mandelling...")
 
-	i := 0
+	type xyi struct {
+		x, y float64
+		i    int
+	}
+
+	set := make(chan xyi, width*height)
+
+	var i int
+
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			a := (float64(x)/float64(width))*(xmax-xmin) + xmin
-			b := (float64(y)/float64(height))*(ymax-ymin) + ymin
-			stop_it, norm := it(a, b)
-			smooth_val := IT + 1 - (math.Log(norm) + float64(stop_it))
-			smooth_val /= IT
-			single_values[i] = 1.0 - smooth_val
-			//fmt.Println(norm)
-			//r, g, b := HuslToRGB(100. + 100. * smooth_val, 88.7, 44.3 + 20. * smooth_val)
-			//r, g, b := smooth_val, .4 * smooth_val, -smooth_val
-			//fmt.Println(norm, stop_it, smooth_val)
-			//c := color.RGBA{uint8(255. * r), uint8(255. * g), uint8(255. * b), 255}
-
-			//image.Set(x, y, c)
+			set <- xyi{x: float64(x), y: float64(y), i: i}
 			i++
 		}
 	}
+
+	close(set)
+
+	var wg sync.WaitGroup
+
+	h, w := float64(height), float64(width)
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for v := range set {
+				a := (v.x/w)*(xmax-xmin) + xmin
+				b := (v.y/h)*(ymax-ymin) + ymin
+				stop_it, norm := it(a, b)
+				smooth_val := IT + 1 - (math.Log(norm) + float64(stop_it))
+				smooth_val /= IT
+				single_values[v.i] = 1.0 - smooth_val
+				//fmt.Println(norm)
+				//r, g, b := HuslToRGB(100. + 100. * smooth_val, 88.7, 44.3 + 20. * smooth_val)
+				//r, g, b := smooth_val, .4 * smooth_val, -smooth_val
+				//fmt.Println(norm, stop_it, smooth_val)
+				//c := color.RGBA{uint8(255. * r), uint8(255. * g), uint8(255. * b), 255}
+
+				//image.Set(x, y, c)
+			}
+		}()
+	}
+
+	wg.Wait()
 
 	sorted_values := make([]float64, len(single_values))
 	for i := range sorted_values {
@@ -117,7 +145,7 @@ func main() {
 	for i := range split_values {
 		//index := (i+1) * len(sorted_values) / len(pal)
 		index := int(float64(len(sorted_values)-1) * (1.0 - start))
-		fmt.Println(index, len(sorted_values))
+		// fmt.Println(index, len(sorted_values))
 		split_values[i] = sorted_values[index]
 		start *= factor
 	}
@@ -129,7 +157,7 @@ func main() {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			color_index := sort.Search(len(split_values), func(j int) bool { return single_values[i] < split_values[j] })
-			//fmt.Println(color_index)
+			// fmt.Println(color_index)
 			image.Set(x, y, pal[color_index])
 			i++
 		}
