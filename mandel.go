@@ -1,13 +1,13 @@
 package main
 
 import (
-	"os"
 	"fmt"
 	img "image"
 	"image/color"
 	"image/color/palette"
 	"image/png"
 	"math"
+	"os"
 	"sort"
 )
 
@@ -17,15 +17,15 @@ func it(ca, cb float64) (int, float64) {
 	var a, b float64 = 0, 0
 	for i := 0; i < IT; i++ {
 		as, bs := a*a, b*b
-		if as + bs > 4 {
+		if as+bs > 4 {
 			return i, as + bs
 		}
 		//if as + bs < .00001 {
 		//	return .00001
 		//}
-		a, b = as - bs + ca, 2 * a * b + cb
+		a, b = as-bs+ca, 2*a*b+cb
 	}
-	return IT, a * a + b * b
+	return IT, a*a + b*b
 }
 
 var Gameboy = []color.Color{
@@ -63,22 +63,21 @@ func main() {
 	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
 	//xpos, ypos, zoom_width := -.16070135, 1.0375665, 1.0e-7
 	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
-	xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
+	xpos, ypos, zoom_width := 0.45272105023, 0.396494224267, .3E-9
 	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
 	//xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000004
-	xmin, xmax := xpos - zoom_width / 2.0, xpos + zoom_width / 2.0
-	ymin, ymax := ypos - zoom_width * ratio / 2.0, ypos + zoom_width * ratio / 2.0
-	
-	
-	single_values := make([]float64, width * height)
-	
+	xmin, xmax := xpos-zoom_width/2.0, xpos+zoom_width/2.0
+	ymin, ymax := ypos-zoom_width*ratio/2.0, ypos+zoom_width*ratio/2.0
+
+	single_values := make([]float64, width*height)
+
 	fmt.Println("Mandelling...")
 
 	i := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			a := (float64(x) / float64(width)) * (xmax - xmin) + xmin 
-			b := (float64(y) / float64(height)) * (ymax - ymin) + ymin
+			a := (float64(x)/float64(width))*(xmax-xmin) + xmin
+			b := (float64(y)/float64(height))*(ymax-ymin) + ymin
 			stop_it, norm := it(a, b)
 			smooth_val := IT + 1 - (math.Log(norm) + float64(stop_it))
 			smooth_val /= IT
@@ -88,7 +87,7 @@ func main() {
 			//r, g, b := smooth_val, .4 * smooth_val, -smooth_val
 			//fmt.Println(norm, stop_it, smooth_val)
 			//c := color.RGBA{uint8(255. * r), uint8(255. * g), uint8(255. * b), 255}
-			
+
 			//image.Set(x, y, c)
 			i++
 		}
@@ -113,7 +112,6 @@ func main() {
 	//pal := Retro
 	split_values := make([]float64, len(pal)-1)
 
-	
 	factor := .98
 	start := .9
 	for i := range split_values {
@@ -125,13 +123,12 @@ func main() {
 	}
 	sort.Float64s(split_values)
 	//fmt.Println(split_values)
-	
 
 	image := img.NewRGBA(img.Rectangle{img.Point{0, 0}, img.Point{width, height}})
 	i = 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			color_index := sort.Search(len(split_values), func(j int) bool {return single_values[i] < split_values[j]})
+			color_index := sort.Search(len(split_values), func(j int) bool { return single_values[i] < split_values[j] })
 			//fmt.Println(color_index)
 			image.Set(x, y, pal[color_index])
 			i++
