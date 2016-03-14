@@ -8,7 +8,7 @@ Calculates a mandelbrot in double point precision, normalises the values such th
 ## Run
 Set x, y and zoom to an interesting point in the mandelbrot and run
 
-`go run mandel.go --aa=4`
+`go run mandel.go -xres 1366 -yres 768 -x -.7454 -y 0.1242 -r .005 -aa 4`
 
 This creates the image out.png with 4x anti aliasing. For more options see:
 
