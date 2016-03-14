@@ -81,7 +81,7 @@ func main() {
 	//xpos, ypos, zoom_width := -.235125, .827214, 4.0e-5
 	//xpos, ypos, zoom_width := -.16070135, 1.0375665, 1.0e-7
 	//xpos, ypos, zoom_width := -.7453, .1127, 6.5e-4
-	xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
+	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
 	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
 	//xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000004
 	xmin, xmax := xpos - radius / 2.0, xpos + radius / 2.0
@@ -131,7 +131,6 @@ func main() {
 	for i := range split_values {
 		//index := (i+1) * len(sorted_values) / len(pal)
 		index := int(float64(len(sorted_values)-1) * (1.0 - start))
-		fmt.Println(index, len(sorted_values))
 		split_values[i] = sorted_values[index]
 		start *= factor
 	}
