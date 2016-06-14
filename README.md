@@ -29,3 +29,5 @@ With help from _jasonmoo_ concurrency is now supported. To make a nice backgroun
 ## Todo
   * Allow for deeper zooms
 
+## Examples
+   * `./mandel --aa 4 -xres 1680 -yres 1050 -out bac.png -x  -0.745428 -y  0.113009 -r .00003 --palette alternate`
