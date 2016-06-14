@@ -29,9 +29,28 @@ func init() {
 	flag.Float64Var(&ypos, "y", 0.0, "imaginary coordinate")
 	flag.Float64Var(&radius, "r", 3.0, "radius")
 	flag.StringVar(&out_filename, "out", "out.png", "output file")
-	flag.StringVar(&palette_string, "palette", "plan9", "One of: plan9|websafe|gameboy|retro")
+	flag.StringVar(&palette_string, "palette", "plan9", "One of: plan9|websafe|gameboy|retro|alternate")
 	flag.BoolVar(&invert, "invert", false, "Inverts colouring")
 	flag.Parse()
+
+	Gray = make([]color.Color, 255 * 3)
+	for i := 0; i < 255*3; i++ {
+		Gray[i] = color.RGBA{uint8(i / 3), uint8((i+1) / 3), uint8((i+2) / 3), 255}
+	}
+
+	Alternate = make([]color.Color, 20)
+	for i := 0; i < len(Alternate); i++ {
+		switch i % 4 {
+		case 0:
+			Alternate[i] = color.RGBA{0x00, 0x33, 0x66, 255}
+		case 1:
+			Alternate[i] = color.RGBA{0x33, 0x99, 0xff, 255}
+		case 2:
+			Alternate[i] = color.RGBA{0xff, 0xcc, 0x99, 255}
+		case 3:
+			Alternate[i] = color.RGBA{0xff, 0x99, 0x66, 255}
+		}
+	}
 }
 
 func it(ca, cb float64) (int, float64) {
@@ -74,6 +93,10 @@ var Retro = []color.Color{
 	color.RGBA{0xfd, 0xd6, 0xf6, 0xff},
 	color.RGBA{0xff, 0xf0, 0xf2, 0xff},
 }
+
+var Gray []color.Color
+
+var Alternate []color.Color
 
 func main() {
 	width, height := xres*aa, yres*aa
@@ -122,12 +145,15 @@ func main() {
 	fmt.Println("Done")
 
 
+	
 	var pal []color.Color
 	palette_map := make(map[string][]color.Color)
 	palette_map["plan9"] = palette.Plan9
 	palette_map["websafe"] = palette.WebSafe
 	palette_map["gameboy"] = Gameboy
 	palette_map["retro"] = Retro
+	palette_map["gray"] = Gray
+	palette_map["alternate"] = Alternate
 
 	pal = palette_map[palette_string]
 
