@@ -129,6 +129,20 @@ func main() {
 		case "4":
 			xpos += temp_radius
 			ypos -= temp_radius
+		case "w":
+			ypos += temp_radius
+		case "s":
+			ypos -= temp_radius
+		case "a":
+			xpos -= temp_radius
+		case "d":
+			xpos += temp_radius
+		case "r":
+			temp_radius, temp_y_radius = radius / 4, y_radius / 4
+		case "z":
+			radius /= 2
+			y_radius /= 2
+			temp_radius, temp_y_radius = radius / 4, y_radius / 4
 		default:
 			return
 		}
@@ -222,5 +236,5 @@ func main() {
 	out_file, _ := os.Create(out_filename)
 	png.Encode(out_file, image_resized)
 	fmt.Println("Finished writing to:", out_filename)
-	fmt.Printf("--x %v --y %v\n", (xmin + xmax) / 2, (ymin + ymax) / 2)
+	fmt.Printf("--r %v --x %v --y %v\n", radius, (xmin + xmax) / 2, (ymin + ymax) / 2)
 }
