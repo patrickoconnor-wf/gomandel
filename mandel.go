@@ -19,6 +19,7 @@ var IT, xres, yres, aa int
 var xpos, ypos, radius float64
 var out_filename, palette_string string
 var invert bool
+var focusstring string
 
 func init() {
 	flag.IntVar(&IT, "IT", 512, "maximum number of iterations")
@@ -30,6 +31,7 @@ func init() {
 	flag.Float64Var(&radius, "r", 3.0, "radius")
 	flag.StringVar(&out_filename, "out", "out.png", "output file")
 	flag.StringVar(&palette_string, "palette", "plan9", "One of: plan9|websafe|gameboy|retro|alternate")
+	flag.StringVar(&focusstring, "focus", "", "sequence of focus command. Select quadrant (numbered 1-4). e.g.: 1423. Read code to understand")
 	flag.BoolVar(&invert, "invert", false, "Inverts colouring")
 	flag.Parse()
 
@@ -40,15 +42,19 @@ func init() {
 
 	Alternate = make([]color.Color, 20)
 	for i := 0; i < len(Alternate); i++ {
-		switch i % 4 {
+		switch i % 6 {
 		case 0:
-			Alternate[i] = color.RGBA{0x00, 0x33, 0x66, 255}
+			Alternate[i] = color.RGBA{0x18, 0x4d, 0x68, 255}
 		case 1:
-			Alternate[i] = color.RGBA{0x33, 0x99, 0xff, 255}
+			Alternate[i] = color.RGBA{0x31, 0x80, 0x9f, 255}
 		case 2:
-			Alternate[i] = color.RGBA{0xff, 0xcc, 0x99, 255}
+			Alternate[i] = color.RGBA{0xfb, 0x9c, 0x6c, 255}
 		case 3:
-			Alternate[i] = color.RGBA{0xff, 0x99, 0x66, 255}
+			Alternate[i] = color.RGBA{0xd5, 0x51, 0x21, 255}
+		case 4:
+			Alternate[i] = color.RGBA{0xcf, 0xe9, 0x90, 255}
+		case 5:
+			Alternate[i] = color.RGBA{0xea, 0xfb, 0xc5, 255}
 		}
 	}
 }
@@ -106,8 +112,34 @@ func main() {
 	//xpos, ypos, zoom_width := 0.45272105023, 0.396494224267,  .3E-9
 	//xpos, ypos, zoom_width := -.160568374422, 1.037894847008, .000001
 	//xpos, ypos, zoom_width := .232223859135, .559654166164, .00000000004
+	y_radius := float64(radius * ratio)
+
+	temp_radius, temp_y_radius := radius / 4.0, y_radius / 4.0
+	for _, command := range focusstring {
+		switch(string(command)) {
+		case "1":
+			xpos -= temp_radius
+			ypos += temp_radius
+		case "2":
+			xpos += temp_radius
+			ypos += temp_radius
+		case "3":
+			xpos -= temp_radius
+			ypos -= temp_radius
+		case "4":
+			xpos += temp_radius
+			ypos -= temp_radius
+		default:
+			return
+		}
+		temp_radius /= 2
+		temp_y_radius /= 2
+	}
+
+	
 	xmin, xmax := xpos - radius / 2.0, xpos + radius / 2.0
-	ymin, ymax := ypos - radius * ratio / 2.0, ypos + radius * ratio / 2.0
+	ymin, ymax := ypos - y_radius / 2.0, ypos + y_radius / 2.0
+
 	
 	single_values := make([]float64, width * height)
 	
@@ -190,4 +222,5 @@ func main() {
 	out_file, _ := os.Create(out_filename)
 	png.Encode(out_file, image_resized)
 	fmt.Println("Finished writing to:", out_filename)
+	fmt.Printf("--x %v --y %v\n", (xmin + xmax) / 2, (ymin + ymax) / 2)
 }
