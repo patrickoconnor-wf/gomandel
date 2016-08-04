@@ -57,6 +57,15 @@ func init() {
 			Alternate[i] = color.RGBA{0xea, 0xfb, 0xc5, 255}
 		}
 	}
+	
+	BlackWhite = make([]color.Color, 0)
+	for i := 0; i < 20; i++ {
+		if i % 2 == 0 {
+			BlackWhite = append(BlackWhite, color.RGBA{0, 0, 0, 255})
+		} else {
+			BlackWhite = append(BlackWhite, color.RGBA{255, 255, 255, 255})
+		}
+	}
 }
 
 func it(ca, cb float64) (int, float64) {
@@ -100,9 +109,7 @@ var Retro = []color.Color{
 	color.RGBA{0xff, 0xf0, 0xf2, 0xff},
 }
 
-var Gray []color.Color
-
-var Alternate []color.Color
+var Gray, Alternate, BlackWhite []color.Color
 
 func main() {
 	width, height := xres*aa, yres*aa
@@ -191,7 +198,14 @@ func main() {
 	fmt.Println("Done")
 
 
-	
+	cont := make([]color.Color, 10000)
+	for i, _ := range cont {
+		//val := float64(i) / float64(len(cont))
+		val :=  i * 256 / len(cont)
+		cont[i] = color.RGBA{uint8(val), 0, uint8(255 - val), uint8(255)}
+	}
+		
+
 	var pal []color.Color
 	palette_map := make(map[string][]color.Color)
 	palette_map["plan9"] = palette.Plan9
@@ -199,7 +213,9 @@ func main() {
 	palette_map["gameboy"] = Gameboy
 	palette_map["retro"] = Retro
 	palette_map["gray"] = Gray
+	palette_map["cont"] = cont
 	palette_map["alternate"] = Alternate
+	palette_map["blackwhite"] = BlackWhite
 
 	pal = palette_map[palette_string]
 
